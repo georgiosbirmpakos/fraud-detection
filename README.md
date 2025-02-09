@@ -1,48 +1,91 @@
-# **Fraud Detection System**
+# 🚀 Fraud Detection System
 
-## **📌 Overview**
-This application is a **real-time fraud detection system** that utilizes machine learning to detect fraudulent transactions. It integrates multiple technologies to ensure **scalability, reliability, and real-time processing** of transaction data.
+## 📌 Overview
+This is a **Fraud Detection System** built using **Spring Boot**, **Kafka**, **MySQL**, and **FastAPI** (for ML model inference). The system detects fraudulent transactions in real-time using machine learning and Kafka for message streaming.
 
-## **🔹 Key Features**
-- **Machine Learning Model**: Uses a **Random Forest Classifier** to detect fraud.
-- **Spring Boot Backend**: Manages API requests and transaction processing.
-- **FastAPI ML Service**: Python-based service for real-time fraud predictions.
-- **Kafka Streaming**: Enables real-time transaction data processing.
-- **Dockerized Deployment**: Runs all services in containers for easy scalability.
-- **Database Integration**: Stores transaction logs and fraud reports.
+## 🛠 Tech Stack
+- **Backend:** Spring Boot (Java 17)
+- **Database:** MySQL 8
+- **Messaging:** Kafka with Zookeeper
+- **Machine Learning:** FastAPI (Python)
+- **Containerization:** Docker & Docker Compose
 
-## **🔹 Technologies Used**
-- **Java (Spring Boot)** – Backend service for transaction management.
-- **Python (FastAPI, Scikit-learn)** – Machine learning model for fraud detection.
-- **Kafka** – Message queue for real-time streaming.
-- **Docker** – Containerized deployment for all services.
-- **MySQL/PostgreSQL** – Database for storing transaction history.
-
-## **🔹 How It Works**
-1. **User initiates a transaction**.
-2. **Kafka Producer** sends transaction data to the Kafka topic.
-3. **Kafka Consumer (Java)** reads the transaction data.
-4. **Java Backend calls the Python API**, which predicts whether the transaction is fraudulent.
-5. **Fraud status is returned** and stored in the database.
-
-## **🔹 Running the Application**
-To run the entire system using Docker, execute:
-```sh
-docker-compose up --build
+## 📁 Project Structure
+```
+fraud-detection/
+│-- backend/             # Spring Boot Application
+│-- ml_model/            # FastAPI Machine Learning Model
+│-- .gitignore           # Ignoring unnecessary files
+│-- docker-compose.yml   # Docker configuration
+│-- README.md            # Project documentation
 ```
 
-To test a transaction manually:
+## 🚀 Getting Started
+### 1️⃣ Clone the Repository
 ```sh
-curl -X POST "http://localhost:8080/api/check-fraud" \
-     -H "Content-Type: application/json" \
-     -d '{"features": [1500.00, -2.3, 1.5, 0.2, 0.9, -1.2, 2.8, 0.3, 1.1, -0.8, 1.9, -0.7, 0.6, -1.5, 2.4, -0.2, 0.5, -2.1, 1.3, 0.8, -0.5, 1.7, 0.4, -1.0, 2.6, -0.3, 0.7, 1.4, -2.0]}'
+git clone https://github.com/georgiosbirmpakos/fraud-detection.git
+cd fraud-detection
 ```
 
-## **🔹 Contribution**
-Feel free to submit **issues** or **pull requests** to improve the system!
+### 2️⃣ Set Up Environment Variables
+Create a **.env** file in the root directory and define your database credentials:
+```env
+DB_USERNAME=root
+DB_PASSWORD=yourpassword
+MYSQL_ROOT_PASSWORD=yourpassword
+DB_URL=jdbc:mysql://mysql-db:3306/fraud_detection
+MYSQL_DATABASE=fraud_detection
+KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+```
 
-## **🚀 Next Steps**
-- **Deploy on AWS (EC2, Lambda, RDS)**
-- **Integrate a Frontend Dashboard**
-- **Optimize Model Performance**
+### 3️⃣ Run the Project Using Docker
+```sh
+docker-compose up --build -d
+```
+This will start **Kafka**, **Zookeeper**, **MySQL**, **Spring Boot**, and **FastAPI** services.
 
+### 4️⃣ Check Running Containers
+```sh
+docker ps
+```
+Ensure all services are running properly.
+
+### 5️⃣ Access Services
+- **Spring Boot API:** http://localhost:8080
+- **FastAPI ML Model:** http://localhost:8000/docs
+- **Kafka UI (if configured):** http://localhost:9092
+
+## 📝 API Endpoints
+| Method | Endpoint                 | Description                          |
+|--------|--------------------------|--------------------------------------|
+| `POST` | `/transactions`          | Submit a transaction for validation |
+| `GET`  | `/transactions/{id}`     | Get transaction status              |
+| `POST` | `/predict/` (FastAPI)    | Predict fraud status using ML model |
+
+## 🔄 Kafka Integration
+- **Topic:** `transactions`
+- **Consumer Group:** `fraud-detection-group`
+- **Message Format:** JSON containing transaction details
+
+## 🐞 Troubleshooting
+### 🔥 Kafka Issues
+If Spring Boot logs show `localhost:9092` errors, check:
+```sh
+docker logs kafka --tail=50
+```
+Ensure Kafka is properly configured in `docker-compose.yml`:
+```yaml
+KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+```
+
+### 🔥 MySQL Issues
+If MySQL fails to start, verify the health status:
+```sh
+docker ps | grep mysql-db
+```
+
+### 🔥 Spring Boot Issues
+Check Spring Boot logs:
+```sh
+docker logs spring-boot --tail=50
+```
