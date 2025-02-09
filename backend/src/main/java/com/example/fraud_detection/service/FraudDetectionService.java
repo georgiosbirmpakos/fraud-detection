@@ -1,5 +1,6 @@
 package com.example.fraud_detection.service;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -9,8 +10,9 @@ import java.util.Map;
 
 @Service
 public class FraudDetectionService {
-    //     private static final String PYTHON_API_URL = "http://localhost:8000/predict/";
-    private static final String PYTHON_API_URL = "http://fastapi-ml:8000/predict/";
+
+    @Value("${FASTAPI_URL}")
+    private String PYTHON_API_URL;
 
     public boolean isFraudulentTransaction(double[] features) {
         RestTemplate restTemplate = new RestTemplate();

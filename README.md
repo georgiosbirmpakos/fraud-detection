@@ -18,6 +18,38 @@ fraud-detection/
 │-- .gitignore           # Ignoring unnecessary files
 │-- docker-compose.yml   # Docker configuration
 │-- README.md            # Project documentation
+
+## Run KAFKA, FAST API and Spring Boot Locally (for further development or testing) :
+
+0. Got to .env files (backend and global) and comment out the "# RUNNING LOCALHOST" (Comment "# RUNNING DOCKER PRODUCTION")
+
+1. KAFKA :
+STARTING ZOOKEEPER
+docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
+STARTING KAFKA
+docker run -d --name kafka --link zookeeper:zookeeper -p 9092:9092 \
+    -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
+    -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
+    -e KAFKA_ZOOKEEPER_CONNECT=zookeeper:2181 \
+    -e KAFKA_BROKER_ID=1 \
+    -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
+    wurstmeister/kafka
+(Check with : docker ps)    
+CREATE KAFKA TOPIC
+docker exec -it kafka kafka-topics.sh --create --topic transactions \
+    --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
+(Check with : docker exec -it kafka kafka-topics.sh --list --bootstrap-server localhost:9092)    
+
+2. FAST API :
+cd ml_model
+uvicorn api:app --host 0.0.0.0 --port 8000
+
+3. SPRING BOOT :
+cd backend
+./mvnw spring-boot:run
+
+4. Test The whole ecosystem works properly (Gitbash):
+curl -X POST "http://localhost:8080/api/send-transaction"      -H "Content-Type: application/json"      -d '{"features": [1500.00, -2.3, 1.5, 0.2, 0.9, -1.2, 2.8, 0.3, 1.1, -0.8, 1.9, -0.7, 0.6, -1.5, 2.4, -0.2, 0.5, -2.1, 1.3, 0.8, -0.5, 1.7, 0.4, -1.0, 2.6, -0.3, 0.7, 1.4, -2.0]}'
 ```
 
 ## 🚀 Getting Started

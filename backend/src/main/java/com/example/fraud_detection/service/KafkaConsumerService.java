@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.KafkaConsumer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -21,15 +22,17 @@ import org.springframework.http.HttpHeaders;
 
 @Service
 public class KafkaConsumerService {
+
+    @Value("${FASTAPI_URL}")
+    private String FASTAPI_URL;
+    @Value("${KAFKA_BOOTSTRAP_SERVERS}")
+    private String kafkaBootstrapServers;
     private static final String TOPIC = "transactions";
-    // private static final String FASTAPI_URL = "http://localhost:8000/predict/";
-    private static final String FASTAPI_URL = "http://fastapi-ml:8000/predict/";
     private final Gson gson = new Gson();
 
     public void consumeTransactions() {
         Properties props = new Properties();
-        // props.put("bootstrap.servers", "localhost:9092");
-        props.put("bootstrap.servers", "kafka:9092");
+        props.put("bootstrap.servers", kafkaBootstrapServers);
         props.put("group.id", "fraud-detection-group");
         props.put("key.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
         props.put("value.deserializer", "org.apache.kafka.common.serialization.StringDeserializer");
