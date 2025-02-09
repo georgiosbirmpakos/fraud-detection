@@ -18,15 +18,22 @@ fraud-detection/
 │-- .gitignore           # Ignoring unnecessary files
 │-- docker-compose.yml   # Docker configuration
 │-- README.md            # Project documentation
+```
 
-## Run KAFKA, FAST API and Spring Boot Locally (for further development or testing) :
+## 🔧 Running Locally (for Development & Testing)
 
-0. Got to .env files (backend and global) and comment out the "# RUNNING LOCALHOST" (Comment "# RUNNING DOCKER PRODUCTION")
+### 0️⃣ Update `.env` Files
+Modify `.env` files in both **backend** and **global** to:
+- Comment out **Docker Production** settings.
+- Uncomment **Localhost Settings**.
 
-1. KAFKA :
-STARTING ZOOKEEPER
+### 1️⃣ Start Kafka & Zookeeper
+Run the following commands:
+```sh
+# Start Zookeeper
 docker run -d --name zookeeper -p 2181:2181 wurstmeister/zookeeper
-STARTING KAFKA
+
+# Start Kafka
 docker run -d --name kafka --link zookeeper:zookeeper -p 9092:9092 \
     -e KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092 \
     -e KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092 \
@@ -34,74 +41,70 @@ docker run -d --name kafka --link zookeeper:zookeeper -p 9092:9092 \
     -e KAFKA_BROKER_ID=1 \
     -e KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1 \
     wurstmeister/kafka
-(Check with : docker ps)    
-CREATE KAFKA TOPIC
+```
+Check running containers:
+```sh
+docker ps
+```
+Create Kafka topic:
+```sh
 docker exec -it kafka kafka-topics.sh --create --topic transactions \
     --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
-(Check with : docker exec -it kafka kafka-topics.sh --list --bootstrap-server localhost:9092)    
-To stop ---> docker stop kafka zookeeper  /  docker ps
+```
+Check available topics:
+```sh
+docker exec -it kafka kafka-topics.sh --list --bootstrap-server localhost:9092
+```
+To stop Kafka and Zookeeper:
+```sh
+docker stop kafka zookeeper
+```
 
-2. FAST API :
+### 2️⃣ Start FastAPI (Machine Learning Model)
+```sh
 cd ml_model
 uvicorn api:app --host 0.0.0.0 --port 8000
+```
 
-3. SPRING BOOT :
+### 3️⃣ Start Spring Boot Backend
+```sh
 cd backend
 ./mvnw spring-boot:run
 mvn spring-boot:run
-
-4. Test The whole ecosystem works properly (Gitbash):
-ISOLATED TRANSACTION 
-curl -X POST "http://localhost:8080/api/send-transaction"      -H "Content-Type: application/json"      -d '{"features": [1500.00, -2.3, 1.5, 0.2, 0.9, -1.2, 2.8, 0.3, 1.1, -0.8, 1.9, -0.7, 0.6, -1.5, 2.4, -0.2, 0.5, -2.1, 1.3, 0.8, -0.5, 1.7, 0.4, -1.0, 2.6, -0.3, 0.7, 1.4, -2.0]}'
-
-ISOLATED TRANSACTION (automatically produced one transaction per second) : 
-curl -X POST http://localhost:8080/api/start-producing
-
-STOP AUTOMATIC TRANSACTION : 
-curl -X POST http://localhost:8080/api/stop-producing
-
 ```
 
-## 🚀 Getting Started
-### 1️⃣ Clone the Repository
+### 4️⃣ Test Transactions
+#### 🔹 Send a Single Transaction
 ```sh
-git clone https://github.com/georgiosbirmpakos/fraud-detection.git
-cd fraud-detection
+curl -X POST "http://localhost:8080/api/send-transaction" -H "Content-Type: application/json" -d '{"features": [1500.00, -2.3, 1.5, 0.2, 0.9, -1.2, 2.8, 0.3, 1.1, -0.8, 1.9, -0.7, 0.6, -1.5, 2.4, -0.2, 0.5, -2.1, 1.3, 0.8, -0.5, 1.7, 0.4, -1.0, 2.6, -0.3, 0.7, 1.4, -2.0]}'
 ```
 
-### 2️⃣ Set Up Environment Variables
-Create a **.env** file in the root directory and define your database credentials:
-```env
-DB_USERNAME=root
-DB_PASSWORD=yourpassword
-MYSQL_ROOT_PASSWORD=yourpassword
-DB_URL=jdbc:mysql://mysql-db:3306/fraud_detection
-MYSQL_DATABASE=fraud_detection
-KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+#### 🔹 Start Automatic Transaction Generation
+```sh
+curl -X POST http://localhost:8080/api/start-producing
+```
+#### 🔹 Stop Automatic Transaction Generation
+```sh
+curl -X POST http://localhost:8080/api/stop-producing
 ```
 
-### 3️⃣ Run the Project Using Docker
+## 🚀 Running with Docker
 ```sh
 docker-compose up --build -d
 ```
 This will start **Kafka**, **Zookeeper**, **MySQL**, **Spring Boot**, and **FastAPI** services.
 
-### 4️⃣ Check Running Containers
+Check running containers:
 ```sh
 docker ps
 ```
-Ensure all services are running properly.
-
-### 5️⃣ Access Services
-- **Spring Boot API:** http://localhost:8080
-- **FastAPI ML Model:** http://localhost:8000/docs
-- **Kafka UI (if configured):** http://localhost:9092
 
 ## 📝 API Endpoints
 | Method | Endpoint                 | Description                          |
 |--------|--------------------------|--------------------------------------|
-| `POST` | `/transactions`          | Submit a transaction for validation |
-| `GET`  | `/transactions/{id}`     | Get transaction status              |
+| `POST` | `/api/send-transaction`  | Submit a transaction for validation |
+| `POST` | `/api/start-producing`   | Start automatic transaction sending |
+| `POST` | `/api/stop-producing`    | Stop automatic transaction sending  |
 | `POST` | `/predict/` (FastAPI)    | Predict fraud status using ML model |
 
 ## 🔄 Kafka Integration
@@ -131,3 +134,4 @@ Check Spring Boot logs:
 ```sh
 docker logs spring-boot --tail=50
 ```
+
