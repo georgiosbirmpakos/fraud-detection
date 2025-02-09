@@ -39,6 +39,7 @@ CREATE KAFKA TOPIC
 docker exec -it kafka kafka-topics.sh --create --topic transactions \
     --bootstrap-server localhost:9092 --partitions 1 --replication-factor 1
 (Check with : docker exec -it kafka kafka-topics.sh --list --bootstrap-server localhost:9092)    
+To stop ---> docker stop kafka zookeeper  /  docker ps
 
 2. FAST API :
 cd ml_model
@@ -47,9 +48,18 @@ uvicorn api:app --host 0.0.0.0 --port 8000
 3. SPRING BOOT :
 cd backend
 ./mvnw spring-boot:run
+mvn spring-boot:run
 
 4. Test The whole ecosystem works properly (Gitbash):
+ISOLATED TRANSACTION 
 curl -X POST "http://localhost:8080/api/send-transaction"      -H "Content-Type: application/json"      -d '{"features": [1500.00, -2.3, 1.5, 0.2, 0.9, -1.2, 2.8, 0.3, 1.1, -0.8, 1.9, -0.7, 0.6, -1.5, 2.4, -0.2, 0.5, -2.1, 1.3, 0.8, -0.5, 1.7, 0.4, -1.0, 2.6, -0.3, 0.7, 1.4, -2.0]}'
+
+ISOLATED TRANSACTION (automatically produced one transaction per second) : 
+curl -X POST http://localhost:8080/api/start-producing
+
+STOP AUTOMATIC TRANSACTION : 
+curl -X POST http://localhost:8080/api/stop-producing
+
 ```
 
 ## 🚀 Getting Started

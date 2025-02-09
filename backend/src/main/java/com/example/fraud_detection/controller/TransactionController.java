@@ -18,5 +18,17 @@ public class TransactionController {
         kafkaProducerService.sendTransaction(transactionData);
         return "Transaction sent to Kafka!";
     }
+
+    @PostMapping("/start-producing")
+    public String startProducing() {
+        kafkaProducerService.startProducing();
+        return "Started automatic transaction generation!";
+    }
+
+    @PostMapping("/stop-producing")
+    public String stopProducing() {
+        kafkaProducerService.stopProducing();
+        return "Stopped automatic transaction generation!";
+    }
 }
 
